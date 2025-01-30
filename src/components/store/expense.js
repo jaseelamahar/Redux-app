@@ -5,7 +5,7 @@ const expensesSlice = createSlice({
   initialState: {
     items: [],
     totalAmount: 0,
-    isPremium: false,
+    isPremium: false, // Default value for isPremium
   },
   reducers: {
     setExpenses(state, action) {
@@ -17,6 +17,9 @@ const expensesSlice = createSlice({
       state.items.push(action.payload);
       state.totalAmount += action.payload.amount;
       state.isPremium = state.totalAmount > 10000;
+    },
+    togglePremium(state) {
+      state.isPremium = !state.isPremium; // Explicitly toggle premium status
     },
   },
 });

@@ -1,19 +1,21 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { useState, useEffect } from 'react';
 import { expensesActions } from './store/expense';
-import PremiumButton from './PremiumButton'; // Import PremiumButton
+import { useState, useEffect } from 'react';
+import { saveAs } from 'file-saver';  // Import file-saver to handle file download
+import PremiumButton from './PremiumButton';
 import ExpenseList from './ExpenseList';
 
 const ExpenseForm = () => {
   const dispatch = useDispatch();
-  const totalAmount = useSelector((state) => state.expense.totalAmount); // Get total expenses from Redux
+  const totalAmount = useSelector((state) => state.expense.totalAmount);
   const isPremium = useSelector((state) => state.expense.isPremium);
+  const expenses = useSelector((state) => state.expense.items); // Get expenses from Redux
   const [expense, setExpense] = useState({
     amount: '',
     description: '',
   });
 
-  const url = 'https://expensetracker-bef3f-default-rtdb.firebaseio.com/expensesredux.json'; // Firebase URL (you may need to change to your specific endpoint)
+  const url = 'https://expensetracker-bef3f-default-rtdb.firebaseio.com/expensesredux.json';
 
   // Fetch expenses from Firebase
   const fetchExpenses = async () => {
@@ -35,7 +37,6 @@ const ExpenseForm = () => {
     }
   };
 
-  // Fetch expenses when the component mounts
   useEffect(() => {
     fetchExpenses();
   }, [dispatch]);
@@ -48,9 +49,8 @@ const ExpenseForm = () => {
       amount: +expense.amount, // Ensure the amount is a number
     };
 
-    // You might also want to save the new expense to Firebase here
     fetch(url, {
-      method: 'POST', // Add new expense to Firebase
+      method: 'POST',
       body: JSON.stringify(expenseData),
       headers: {
         'Content-Type': 'application/json',
@@ -58,13 +58,38 @@ const ExpenseForm = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        // After successfully adding to Firebase, update Redux store
         dispatch(expensesActions.addExpense({ id: data.name, ...expenseData }));
       })
       .catch((error) => console.error('Error adding expense:', error));
 
-    // Reset form after submission
     setExpense({ amount: '', description: '' });
+  };
+
+  // Function to download expenses as CSV
+  const downloadCSV = () => {
+    const headers = ['ID', 'Amount', 'Description'];
+    const rows = expenses.map((expense) => [
+      expense.id,
+      expense.amount,
+      expense.description,
+    ]);
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+
+    // Add headers
+    csvContent += headers.join(',') + '\n';
+
+    // Add rows
+    rows.forEach((row) => {
+      csvContent += row.join(',') + '\n';
+    });
+
+    // Trigger file download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'expenses.csv');
+    link.click();
   };
 
   return (
@@ -83,7 +108,9 @@ const ExpenseForm = () => {
         <button type="submit">Add Expense</button>
       </form>
 
-      {/* Conditionally render Premium Button inside ExpenseForm */}
+      {/* Download CSV Button */}
+      <button onClick={downloadCSV}>Download Expenses as CSV</button>
+
       {isPremium && <PremiumButton />}
       <ExpenseList />
     </div>
