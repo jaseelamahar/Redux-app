@@ -97,17 +97,19 @@ const ExpenseForm = () => {
       <form onSubmit={submitHandler}>
         <input
           type="number"
+          aria-label="amount" 
           value={expense.amount}
           onChange={(e) => setExpense({ ...expense, amount: e.target.value })}
         />
         <input
           type="text"
           value={expense.description}
+          aria-label="description"
           onChange={(e) => setExpense({ ...expense, description: e.target.value })}
         />
         <button type="submit">Add Expense</button>
       </form>
-
+      <p>Total Amount: {totalAmount}</p>
       {/* Download CSV Button */}
       <button onClick={downloadCSV}>Download Expenses as CSV</button>
 
