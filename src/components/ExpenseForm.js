@@ -44,9 +44,15 @@ const ExpenseForm = () => {
   // Submit handler for adding new expense
   const submitHandler = (event) => {
     event.preventDefault();
+    const { amount, description } = expense;
+    if (!amount || !description) {
+      alert('Please fill in both fields.');
+      return;
+    }
+    
     const expenseData = {
       ...expense,
-      amount: +expense.amount, // Ensure the amount is a number
+      amount: +expense.amount, 
     };
 
     fetch(url, {
@@ -119,4 +125,4 @@ const ExpenseForm = () => {
   );
 };
 
-export default ExpenseForm;
+export default ExpenseForm
